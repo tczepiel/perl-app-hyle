@@ -9,7 +9,6 @@ use Plack::Request;
 use Plack::Response;
 use Plack::Util::Accessor qw(schema _registered_sources);
 use DBIx::Class;
-use DBIx::Class::Schema::Loader;
 use JSON;
 
 sub call {
@@ -41,13 +40,37 @@ sub call {
 
                 return $response->finalize;
             }
+
+            $response->status(404) unless $response->status;
+
+            return $response->finalize;
             
         }
         elsif ( $req->method eq 'POST')  {
+           my $ret = $rs->find($args[0]);
+
+          $ret->update(%{ $req->body_parameters });
+
+          my $res = $req->new_response(200);
+          return $res->finalize;
 
         }
         elsif ( $req->method eq 'PUT' ) {
 
+            my $res = $rs->create(%{
+                $req->body_parameters
+            });
+            my @primary = $rs->result_source->primary_columns();
+
+            my $resp = $req->new_response(200);
+            $resp->content_type("data/json");
+            $resp->body(
+                encode_json([
+                    map { $_ => $res->$_ } @primary
+                ])
+            );
+
+            return $resp->finalize();
         }
         elsif ( $req->method eq 'DELETE' ) {
 
@@ -57,11 +80,10 @@ sub call {
 
             my $ret = $rs->delete;
             
-            my $res = $eq->new_response(200);
+            my $res = $req->new_response(200);
             return $res->finalize;
         }
     }
-
 }
 
 
