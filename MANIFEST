@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Plack-App-DBIC.t
+lib/Plack/App/DBIC.pm
