@@ -76,10 +76,8 @@ sub call {
 
             $rs->search({
                 $primary => { -in => \@args },
-            });
+            })->delete();
 
-            my $ret = $rs->delete;
-            
             my $res = $req->new_response(200);
             return $res->finalize;
         }
