@@ -25,7 +25,6 @@ sub call {
         my ($primary) = $rs->result_source->primary_columns();
 
         if ( $req->method eq 'GET' ) {
-            $rs->result_class('DBIx::Class::ResultClass::HashRefInflator');
 
             my @ret = $rs->search({
                 $primary => { -in => \@args },
@@ -41,7 +40,7 @@ sub call {
                 return $response->finalize;
             }
 
-            $response->status(404) unless $response->status;
+            $response->status(404);
 
             return $response->finalize;
             
@@ -57,7 +56,7 @@ sub call {
         }
         elsif ( $req->method eq 'PUT' ) {
 
-            my $res = $rs->create(%{
+            my $res = $rs->create(\%{
                 $req->body_parameters
             });
             my @primary = $rs->result_source->primary_columns();
@@ -81,6 +80,10 @@ sub call {
             my $res = $req->new_response(200);
             return $res->finalize;
         }
+    }
+    else {
+        my $resp = Plack::Response->new(404);
+        return $resp->finalize;
     }
 }
 
