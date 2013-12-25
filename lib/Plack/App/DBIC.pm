@@ -27,15 +27,20 @@ sub call {
         if ( $req->method eq 'GET' ) {
 
             my @ret = $rs->search({
-                $primary => { -in => \@args },
-            });
+                    $primary => { -in => \@args },
+                },
+                {
+                    result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+                }
+            );
 
             my $response = Plack::Response->new();
             if ( @ret ) {
+
                 $response->status(200);
                 $response->content_type('data/json');
 
-                $response->body(encode_json([ map { $_->{_column_data} } @ret ]));
+                $response->body(encode_json(\@ret));
 
                 return $response->finalize;
             }
