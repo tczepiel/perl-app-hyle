@@ -18,16 +18,16 @@ my $test = Plack::Test->create($app);
 # GET
 lives_ok(sub {
    my $res = $test->request(
-    +HTTP::Request->new(GET => 'a/1');
+    +HTTP::Request->new(GET => 'a/1')
    );
 
    ok($res->is_success,"response is succesful");
-   ok($response->code == 200, "response code 200 OK");
+   ok($res->code == 200, "response code 200 OK");
 
     my $ret;
    
    lives_ok(sub {
-       $ret = JSON::decode_json($response->decoded_content);
+       $ret = JSON::decode_json($res->decoded_content);
    }, "can deserialize the body");
 
     ok($ret->{a} == 1, "returned content matches input");
@@ -52,7 +52,7 @@ lives_ok(sub {
     ok($res->code == 200, "response code 200 OK");
 
     $req = HTTP::Request->new(GET => 'a/1');
-    $res = $test->reques($req);
+    $res = $test->request($req);
 
     ok($res->code == 404, "resource deleted succesfully");
 
