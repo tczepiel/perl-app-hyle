@@ -2,14 +2,28 @@ package Plack::App::DBIC;
 
 use strict;
 use warnings;
-
 use Data::Dumper;
 use parent 'Plack::Component';
 use Plack::Request;
 use Plack::Response;
-use Plack::Util::Accessor qw(schema _registered_sources);
+use Plack::Util::Accessor qw(schema serializers);
 use DBIx::Class;
-use JSON;
+
+sub serializer {
+    my $self    = shift;
+    my $request = shift;
+
+    my $serializers     = $self->serializers || $self->serializers({});
+    my ($accept_format) = $request->headers->header("Accept");
+
+    return $serializers->{$accept_format} if exists $serializers->{$accept_format};
+
+    # default to JSON
+    require JSON;
+    return sub {
+        return ('data/json', JSON::encode_json(@_));
+    };
+}
 
 sub call {
     my $self = shift;
@@ -38,9 +52,11 @@ sub call {
             if ( @ret ) {
 
                 $response->status(200);
-                $response->content_type('data/json');
 
-                $response->body(encode_json(\@ret));
+                my ($content_type, $data) = $self->serializer($req)->(\@ret);
+
+                $response->content_type($content_type);
+                $response->body( $data );
 
                 return $response->finalize;
             }
@@ -67,12 +83,10 @@ sub call {
             my @primary = $rs->result_source->primary_columns();
 
             my $resp = $req->new_response(200);
-            $resp->content_type("data/json");
-            $resp->body(
-                encode_json([
-                    map { $_ => $res->$_ } @primary
-                ])
-            );
+
+            my ($content_type,$data) = $self->serializer($req)->((map { $_ => $res->$_ } @primary));
+            $resp->content_type($content_type);
+            $resp->body($data);
 
             return $resp->finalize();
         }

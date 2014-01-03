@@ -1,12 +1,15 @@
-use 5.010001;
+use strict;
+use warnings;
+
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
 WriteMakefile(
     NAME              => 'Plack::App::DBIC',
-    VERSION_FROM      => 'lib/Plack/App/DBIC.pm', # finds $VERSION
-    PREREQ_PM         => {}, # e.g., Module::Name => 1.1
-    ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM  => 'lib/Plack/App/DBIC.pm', # retrieve abstract from module
+    VERSION_FROM      => 'lib/Plack/App/DBIC.pm',
+    PREREQ_PM         => {
+        JSON => 0,
+        'DBIx::Class' => 0,
+    },
+    ($] >= 5.005 ?
+      (ABSTRACT_FROM  => 'lib/Plack/App/DBIC.pm',
        AUTHOR         => 'A. U. Thor <tjmc@localdomain>') : ()),
 );
