@@ -10,6 +10,8 @@ use DBIx::Class;
 use Package::Stash;
 use Carp qw(croak);
 
+our $VERSION = '0.1';
+
 sub __GET {
     my ($self,$req,$resultset,$rs,@args) = @_;
 
@@ -140,5 +142,22 @@ sub call {
     }
 }
 
+=head1 NAME
+
+Plack::App::DBIC
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+=head1 restify
+
+=head2 OBJECT ATTRIBUTES
+
+=head3 serializers
+
+=head3 override
+
+=head3 serializers
 
 1;
