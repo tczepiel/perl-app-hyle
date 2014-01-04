@@ -163,4 +163,9 @@ Plack::App::DBIC
 
 =head3 serializers
 
+=head2 Overriding HTTP method handlers
+
+subclass, global overrides, method implementation in resultsource class
+
+
 1;
