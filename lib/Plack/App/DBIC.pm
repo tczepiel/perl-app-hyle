@@ -85,8 +85,10 @@ sub _rest2subref {
     my $method = $req->method();
 
     my $subref = $rest2subref->{$resultset}{$method} ||= do {
-        my $rs = $self->schema->resultset($resultset);
-        if ( my $coderef = $rs->can($method) ) {
+        my $rs    = $self->schema->resultset($resultset);
+        my $class = $rs->result_source->result_class;
+
+        if ( my $coderef = $class->can($method) ) {
             return $coderef;
         }
         elsif ( my $overrides = $self->override ) {
@@ -143,6 +145,10 @@ sub call {
     }
 }
 
+1;
+
+__END__
+
 =head1 NAME
 
 Plack::App::DBIC
@@ -167,5 +173,3 @@ Plack::App::DBIC
 
 subclass, global overrides, method implementation in resultsource class
 
-
-1;
