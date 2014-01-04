@@ -11,6 +11,7 @@ WriteMakefile(
         JSON             => 0,
         'DBIx::Class'    => 0,
         'Package::Stash' => 0,
+        'HTTP::Message'  => 0,
     },
     ($] >= 5.005 ?
       (ABSTRACT_FROM  => 'lib/Plack/App/DBIC.pm',

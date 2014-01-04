@@ -1,28 +1,39 @@
 use strict;
 use warnings;
 
+use Carp::Always;
 use Test::More qw(no_plan);
 use Test::Exception;
 use lib 't';
 use MySchema;
 use Plack::App::DBIC;
 use Plack::Test;
+use HTTP::Request::Common qw();
 use HTTP::Request;
 use JSON;
 
-my $schema = MySchema->connect('dbi:SQLite:memory');
+my $dbfile =':memory';
+my $schema = MySchema->connect("dbi:SQLite:dbname=$dbfile","","");
 
 my $app  = Plack::App::DBIC->new(schema => $schema)->to_app;
+
+{
+    my $dbh = $schema->storage->dbh;
+    $dbh->do("CREATE TABLE A (a int not null)");
+    $dbh->do("INSERT INTO A VALUES (1)");
+}
+
 my $test = Plack::Test->create($app);
 
 # GET
 lives_ok(sub {
    my $res = $test->request(
-    +HTTP::Request->new(GET => 'a/1')
+    +HTTP::Request->new(GET => 'A/1')
    );
 
+   diag($res->decoded_content);
    ok($res->is_success,"response is succesful");
-   ok($res->code == 200, "response code 200 OK");
+   cmp_ok($res->code,'==', 200, "response code 200 OK");
 
     my $ret;
    
@@ -30,41 +41,44 @@ lives_ok(sub {
        $ret = JSON::decode_json($res->decoded_content);
    }, "can deserialize the body");
 
-    ok($ret->{a} == 1, "returned content matches input");
+   cmp_ok(ref($ret),'eq','ARRAY',"response isa ARRAYREF");
+   ok(@$ret == 1, "only one result returned");
+
+   ok($ret->[0]{a} == 1, "returned content matches input");
 
 }, "get works");
 
 # POST ( update )
 lives_ok(sub {
-    my $req = HTTP::Request->new(POST => 'a/1');
-    $req->content(JSON::encode_json({a => 2}));
+    my $req = HTTP::Request::Common::POST 'A/1', [ a => 2 ];
     my $res = $test->request($req);
     
-    ok($res->code == 200, "response code 200 OK");
+    cmp_ok($res->code, '==', 200, "response code 200 OK");
+    diag($res->decoded_content());
 
-},'POST works');
+},'POST(update) works');
 
 # DELETE
 lives_ok(sub {
-    my $req = HTTP::Request->new(DELETE=> 'a/1');
+    my $req = HTTP::Request->new(DELETE=> 'A/1');
     my $res = $test->request($req);
     
     ok($res->code == 200, "response code 200 OK");
 
-    $req = HTTP::Request->new(GET => 'a/1');
+    $req = HTTP::Request->new(GET => 'A/1');
     $res = $test->request($req);
 
     ok($res->code == 404, "resource deleted succesfully");
 
-},'POST works');
+},'DELETE works');
 
-# PUT (create)
+# POST (create)
 lives_ok(sub {
-    my $req = HTTP::Request->new(PUT => 'a/2');
-    $req->content(JSON::encode_json({a => 0}));
+    my $req = HTTP::Request::Common::POST 'A/', [ a => 0 ];
     my $res = $test->request($req);
 
-    ok($res->code == 200, "resource created ok");
+    cmp_ok($res->code,'==',200, "resource created ok");
+    diag($res->decoded_content());
     my $ret;
     lives_ok(sub {
         $ret = JSON::decode_json($res->decoded_content());
@@ -74,6 +88,6 @@ lives_ok(sub {
 
     },"decoded response ok");
 
-}, "PUT works");
+}, "POST(create) works");
 
 

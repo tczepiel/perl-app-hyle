@@ -2,7 +2,6 @@ package Plack::App::DBIC;
 
 use strict;
 use warnings;
-use Data::Dumper;
 use parent 'Plack::Component';
 use Plack::Request;
 use Plack::Response;
@@ -42,26 +41,28 @@ sub __GET {
 
 sub __POST {
     my ($self,$req,$resultset,$rs,@args) = @_;
-    my $ret = $rs->find($args[0]);
-    $ret->update(%{ $req->body_parameters });
-    return $req->new_response(200);
-}
 
-sub __PUT {
-    my ($self,$req,$resultset,$rs,@args) = @_;
+    my $body_params = $req->body_parameters;
+    my $params      = ref($body_params) && $body_params->isa("Hash::MultiValue") 
+                      ? $body_params->as_hashref 
+                      : $body_params;
 
-    my $res = $rs->create(\%{
-        $req->body_parameters
-    });
+    my $res     = $rs->update_or_new($params);
+    my $resp    = $req->new_response(200);
+
+    # update worked ok, let's bail out here
+    return $resp if $res->in_storage();
+    $res->insert();
 
     #return primary keys back
     my @primary = $rs->result_source->primary_columns();
-    my $resp    = $req->new_response(200);
+
     my ($content_type,$data) 
-        = $self->serializer($req)->((map { $_ => $res->$_ } @primary));
+        = $self->serializer($req)->({ (map { $_ => $res->get_column($_) } @primary) });
 
     $resp->content_type($content_type);
     $resp->body($data);
+
     return $resp;
 }
 
@@ -107,7 +108,7 @@ sub serializer {
     my $serializers     = $self->serializers || $self->serializers({});
     my ($accept_format) = $request->headers->header("Accept");
 
-    return $serializers->{$accept_format} if exists $serializers->{$accept_format};
+    return $serializers->{$accept_format} if $accept_format && exists $serializers->{$accept_format};
 
     # default to JSON
     require JSON;
