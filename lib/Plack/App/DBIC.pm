@@ -50,8 +50,18 @@ sub __POST {
                       ? $body_params->as_hashref 
                       : $body_params;
 
-    my $res     = $rs->update_or_new($params);
+    my $res     = $rs->find_or_new($params);
     my $resp    = $req->new_response(200);
+
+    # are the updetes on post enabled?
+    if ( $res->in_storage() && $self->allow_post_updates ) {
+        $res->update();
+        return $resp;
+    }
+    elsif ( $res->in_storage() ) {
+        $resp->status(409); # conflict
+        return $resp;
+    }
 
     # update worked ok, let's bail out here
     return $resp if $res->in_storage();
@@ -168,6 +178,15 @@ Plack::App::DBIC
 =head1 SYNOPSIS
 
 =head1 restify
+
+=head1 HTTP Methods
+
+=head2 GET
+
+=head2 POST - update/create
+
+=head2 DELETE
+
 
 =head2 OBJECT ATTRIBUTES
 
