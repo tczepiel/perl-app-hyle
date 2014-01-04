@@ -5,7 +5,7 @@ use warnings;
 use parent 'Plack::Component';
 use Plack::Request;
 use Plack::Response;
-use Plack::Util::Accessor qw(schema serializers override);
+use Plack::Util::Accessor qw(schema serializers override result_sources);
 use DBIx::Class;
 use Package::Stash;
 use Carp qw(croak);
@@ -129,7 +129,8 @@ sub call {
     my (undef,$resultset,$args) = split "/", $req->path_info;
     my @args = ($args =~ /,/ ? (split ",", $args) : $args);
 
-    if ( my $rs = $self->schema->resultset($resultset) ) {
+    if ( my $rs = $self->schema->resultset($resultset)
+        && (!$self->result_sources || exists$self->result_sources->{$resultset})) {
 
         my $dispatch_method = $self->_rest2subref($req,$resultset);
         my $response        = $dispatch_method->($self,$req,$resultset,$rs,@args);
@@ -157,6 +158,8 @@ Plack::App::DBIC
 =head3 serializers
 
 =head3 override
+
+=head3 result_sources
 
 =head3 serializers
 
