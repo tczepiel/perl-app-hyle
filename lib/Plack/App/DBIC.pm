@@ -5,7 +5,8 @@ use warnings;
 use parent 'Plack::Component';
 use Plack::Request;
 use Plack::Response;
-use Plack::Util::Accessor qw(schema serializers override result_sources);
+use Plack::Util::Accessor
+    qw(schema serializers override result_sources validator);
 use DBIx::Class;
 use Package::Stash;
 use Carp qw(croak);
@@ -131,8 +132,17 @@ sub call {
     my (undef,$resultset,$args) = split "/", $req->path_info;
     my @args = ($args =~ /,/ ? (split ",", $args) : $args);
 
-    if ( my $rs = $self->schema->resultset($resultset)
+    if ( (my $rs = $self->schema->resultset($resultset))
         && (!$self->result_sources || exists$self->result_sources->{$resultset})) {
+
+        # parameter validation
+        if ( $self->validator && (my $params = $req->body_parameters) ) {
+            my $ret = $self->validator->check_params($resultset,$req);
+            unless ($ret) {
+                # bad request/unprocessable entity
+                return $req->new_response(422);
+            }
+        }
 
         my $dispatch_method = $self->_rest2subref($req,$resultset);
         my $response        = $dispatch_method->($self,$req,$resultset,$rs,@args);
