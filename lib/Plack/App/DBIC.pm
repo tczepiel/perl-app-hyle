@@ -10,6 +10,7 @@ use Plack::Util::Accessor
 use DBIx::Class;
 use Package::Stash;
 use Carp qw(croak carp);
+use attributes qw();
 
 our $VERSION = '0.1';
 
@@ -26,9 +27,15 @@ sub __jsonp_method {
     return $req->new_response(404)
         unless $object;
 
-    my $method_is_jsonp = 0; # TODO
+    my $result_source_class = $rs->result_source->result_class;
+    my $p                   = Package::Stash->new($result_source_class);
+    my $is_jsonp_method 
+        = grep { $_ eq 'JSONP' } 
+            ( $object->can($jsonp_method_name)
+               ? attributes::get($p->get_symbol('&'.$jsonp_method_name))
+               : ());
 
-    if ( $object->can($jsonp_method_name) ) {
+    if ( $is_jsonp_method ) {
         my @ret;
         eval {
             @ret = $object->$jsonp_method_name(%params);
