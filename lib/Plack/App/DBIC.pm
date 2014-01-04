@@ -9,9 +9,56 @@ use Plack::Util::Accessor
     qw(schema serializers override result_sources validator);
 use DBIx::Class;
 use Package::Stash;
-use Carp qw(croak);
+use Carp qw(croak carp);
 
 our $VERSION = '0.1';
+
+sub __jsonp_method {
+    my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
+
+    my ($primary) = $rs->result_source->primary_columns();
+    my %params = $req->body_parameters();
+
+    my ($object) = $rs->search({
+        $primary => { -in => \@args },
+    })->first;
+
+    return $req->new_response(404)
+        unless $object;
+
+    my $method_is_jsonp = 0; # TODO
+
+    if ( $object->can($jsonp_method_name) ) {
+        my @ret;
+        eval {
+            @ret = $object->$jsonp_method_name(%params);
+            1;
+        } or do {
+            my $err = $@ || "unknown error";
+            carp sprintf "Died executing %s, error: %s, parameters %s",
+               $jsonp_method_name,
+               $err,
+               join ",", map { "$_=>$params{$_}" } keys %params;
+
+               return $req->new_response(500); # internal server error
+        };
+
+        
+        my $resp = $req->new_response(204); # ok, no content
+        if ( @ret ) {
+            $resp->code(200);
+            my ($content_type, $data) = $self->serializer($req)->(\@ret);
+            $resp->body($data);
+            $resp->content_type($content_type);
+
+            return $resp;
+        }
+    }
+    else {
+        return $req->new_response(501); #not implemented
+    }
+
+}
 
 sub __GET {
     my ($self,$req,$resultset,$rs,@args) = @_;
@@ -155,7 +202,24 @@ sub call {
         }
 
         my $dispatch_method = $self->_rest2subref($req,$resultset);
-        my $response        = $dispatch_method->($self,$req,$resultset,$rs,@args);
+        my $response;
+
+        my ($jsonp_method_name,$jsonp_callback_function) = do {
+            my $query = $req->query_parameters;
+            @{$query}{qw(jsonp jsonp_callback)};
+        };
+
+        if ( $jsonp_method_name ) {
+            # jsonp call
+            $response = $self->__jsonp_method($req,$resultset,$rs,$jsonp_method_name,@args);
+            if ($jsonp_callback_function && $response->body) {
+                my $body = $response->body;
+                $response->body( "$jsonp_callback_function ($body)" );
+            }
+        }
+        else {
+            $response = $dispatch_method->($self,$req,$resultset,$rs,@args);
+        }
 
         return $response->finalize;
     }
