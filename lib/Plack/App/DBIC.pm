@@ -256,11 +256,37 @@ Plack::App::DBIC
 
 =head3 serializers
 
+    %serializers = (
+        "application/json" => sub { ... },
+        ...,
+    );
+
+defaults to 'data/json', response content type and JSON::encode_json serialization function.
+
 =head3 override
+
+    %overrides = (
+        'artist' => { GET => sub { ... } },
+        ...,
+    );
+
+allows overriding particular methods.
+
+if the class itself implements the GET/POST/DELETE etc., methods, those will be invoked first, then followed by the check for an appropriate method in the %overrides hash, if no method is found, the default __GET, __POST (etc) implementation will be used.
 
 =head3 result_sources
 
-=head3 serializers
+    %result_sources = (
+        artist => 1,
+        cds    => 1,
+        ...
+    );
+
+Expose only the following result sources in the api.
+
+=head3 allow_post_updates
+
+If true, the POST will either create or update an existing resource. It's false by default, on conflict of an existing respource, a 409 HTTP response is returned.
 
 =head2 Overriding HTTP method handlers
 
