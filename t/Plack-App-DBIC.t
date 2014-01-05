@@ -58,6 +58,16 @@ lives_ok(sub {
 
 },'POST(update) works');
 
+# JSONP
+lives_ok(sub {
+    my $req = HTTP::Request::Common::POST 'A/1?jsonp=foo', { a => 1 };
+    my $res = $test->request($req);
+
+    cmp_ok($res->code,'==',200,"code returned : 200 OK");
+
+},"JSONP method works");
+
+
 # DELETE
 lives_ok(sub {
     my $req = HTTP::Request->new(DELETE=> 'A/1');
@@ -90,4 +100,11 @@ lives_ok(sub {
 
 }, "POST(create) works");
 
+# JSONP - not found
+lives_ok(sub {
+    my $req = HTTP::Request::Common::POST 'A/1?jsonp=foo', { a => 1 };
+    my $res = $test->request($req);
 
+    cmp_ok($res->code,'==',404);
+
+},"JSONP method works");

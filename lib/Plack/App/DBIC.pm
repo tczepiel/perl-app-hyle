@@ -1,5 +1,6 @@
 package Plack::App::DBIC;
 
+use Data::Dumper;
 use strict;
 use warnings;
 use parent 'Plack::Component';
@@ -18,7 +19,7 @@ sub __jsonp_method {
     my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
 
     my ($primary) = $rs->result_source->primary_columns();
-    my %params = $req->body_parameters();
+    my %params = %{$req->body_parameters()};
 
     my ($object) = $rs->search({
         $primary => { -in => \@args },
@@ -29,6 +30,10 @@ sub __jsonp_method {
 
     my $result_source_class = $rs->result_source->result_class;
     my $p                   = Package::Stash->new($result_source_class);
+
+    my @a = attributes::get($p->get_symbol('&'.$jsonp_method_name));
+    warn Dumper \@a;
+
     my $is_jsonp_method 
         = grep { $_ eq 'JSONP' } 
             ( $object->can($jsonp_method_name)
