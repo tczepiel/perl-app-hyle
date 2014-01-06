@@ -27,18 +27,11 @@ sub __jsonp_method {
     return $req->new_response(404)
         unless $object;
 
-    my $result_source_class = $rs->result_source->result_class;
-    my $p                   = Package::Stash->new($result_source_class);
+    my $result_source_class  = $rs->result_source->result_class;
+    my $jsonp_method_coderef = $object->can($jsonp_method_name);
 
-    my @a = attributes::get($p->get_symbol('&'.$jsonp_method_name));
-
-    my $is_jsonp_method 
-        = grep { $_ eq 'JSONP' } 
-            ( $object->can($jsonp_method_name)
-               ? attributes::get($p->get_symbol('&'.$jsonp_method_name))
-               : ());
-
-    if ( $is_jsonp_method ) {
+    if ( grep { $_ eq 'JSONP' } attributes::get($jsonp_method_coderef) ) { 
+        # method has a 'JSONP' attribute.
         my @ret;
         eval {
             @ret = $object->$jsonp_method_name(%params);
