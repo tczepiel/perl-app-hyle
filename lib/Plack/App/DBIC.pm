@@ -49,7 +49,8 @@ sub __jsonp_method {
         
         my $resp = $req->new_response(204); # ok, no content
         if ( @ret ) {
-            $resp->code(200);
+            $resp->status(200);
+
             my ($content_type, $data) = $self->serializer($req)->(\@ret);
             $resp->body($data);
             $resp->content_type($content_type);
