@@ -1,6 +1,5 @@
 package Plack::App::DBIC;
 
-use Data::Dumper;
 use strict;
 use warnings;
 use parent 'Plack::Component';
@@ -32,7 +31,6 @@ sub __jsonp_method {
     my $p                   = Package::Stash->new($result_source_class);
 
     my @a = attributes::get($p->get_symbol('&'.$jsonp_method_name));
-    warn Dumper \@a;
 
     my $is_jsonp_method 
         = grep { $_ eq 'JSONP' } 
