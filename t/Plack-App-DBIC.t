@@ -12,7 +12,7 @@ use HTTP::Request::Common qw();
 use HTTP::Request;
 use JSON;
 
-my $dbfile =':memory';
+my $dbfile =':memory:';
 my $schema = MySchema->connect("dbi:SQLite:dbname=$dbfile","","");
 
 my $app  = Plack::App::DBIC->new(schema => $schema)->to_app;
