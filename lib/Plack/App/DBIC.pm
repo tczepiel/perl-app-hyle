@@ -114,8 +114,6 @@ sub __POST {
         return $resp;
     }
 
-    # update worked ok, let's bail out here
-    return $resp if $res->in_storage();
     $res->insert();
 
     #return primary keys back
