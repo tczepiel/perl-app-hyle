@@ -65,6 +65,8 @@ lives_ok(sub {
 
     cmp_ok($res->code,'==',200,"code returned : 200 OK");
 
+    cmp_ok($res->decoded_content,'eq', '[1]', "response retured as expected");
+
 },"JSONP method works");
 
 
