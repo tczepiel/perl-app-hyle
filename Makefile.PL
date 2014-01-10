@@ -16,4 +16,5 @@ WriteMakefile(
     ($] >= 5.005 ?
       (ABSTRACT => "Simle REST API implementation based on Plack",
        AUTHOR         => 'A. U. Thor <tjmc@localdomain>') : ()),
+    EXE_FILES => [ 'scripts/restify.pl' ],
 );
