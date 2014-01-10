@@ -247,11 +247,13 @@ Plack::App::DBIC
 
 =head1 DESCRIPTION
 
+Simple REST API interface to the database backend using Plack and DBIx::Class
+
 =head1 SYNOPSIS
 
     # cpanm Plack::App::DBIC
 
-    # restify  --dsn'dbi::SQLite::dbname=file.db' --username=... --password= ....
+    # restify.pl  --dsn'dbi::SQLite::dbname=file.db' --username=... --password= ....
 
     # curl http://localhost:8000/collection/id/7
 
@@ -357,7 +359,14 @@ var ret = someFancyObject.foo({ meh => 1 },{ callback => function() { ... }} );
 POST http://localhost:8000/artist/id/7?jsonp=foo&jsonp_callback=gotData
 meh: 1
 
-...
+
+=head1 COPYRIGHT AND LICENCE
+
+Copyright (C) 2014 Tomasz Czepiel
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.1 or,
+at your option, any later version of Perl 5 you may have available.
 
 
 
