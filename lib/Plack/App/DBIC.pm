@@ -70,7 +70,6 @@ sub __HEAD {
     $res->body(undef) if $res->status == 404;
     return $res;
 }
-
 sub __GET {
     my ($self,$req,$resultset,$rs,@args) = @_;
 

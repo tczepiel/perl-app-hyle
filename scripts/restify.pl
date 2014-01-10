@@ -10,6 +10,7 @@ use DBIx::Class::Schema::Loader;
 use Class::Load;
 use Getopt::Long;
 use Plack::Runner;
+use Plack::App::DBIC;
 
 my $dsn;
 GetOptions("dsn=s" => \$dsn)
@@ -18,7 +19,7 @@ GetOptions("dsn=s" => \$dsn)
 my $tempdir = tempdir();
 DBIx::Class::Schema::Loader::make_schema_at(
     'Schema',
-    {debug => 1, dump_directory => $tempdir },
+    { dump_directory => $tempdir },
     [ $dsn,  "", "", {} ],
 );
 
@@ -26,8 +27,8 @@ DBIx::Class::Schema::Loader::make_schema_at(
 push @INC, $tempdir;
 
 eval {
-    require MySchema;
-    MySchema->import();
+    require Schema;
+    Schema->import();
     1;
 } or do {
     my $err = $@ || "unknown";
@@ -35,14 +36,20 @@ eval {
 };
 
 # get the scema
-my $schema = MySchema->connect($dsn, "", "");
+my $schema = Schema->connect($dsn, "", "");
+
+for my $source ($schema->sources() ) {
+    # hack, add something as a primary column if no primary column(s) are defined
+    my $source_class = $schema->source($source);
+    next if $source_class->primary_columns();
+ 
+    $source_class->set_primary_key($source_class->columns());
+}
 
 my $app    = Plack::App::DBIC->new( schema => $schema )->to_app;
 my $runner = Plack::Runner->new();
 $runner->parse_options(@ARGV);
 
 $runner->run($app);
-
-
 
 unlink $tempdir if -e $tempdir;
