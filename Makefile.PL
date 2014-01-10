@@ -14,6 +14,6 @@ WriteMakefile(
         'HTTP::Message'  => 0,
     },
     ($] >= 5.005 ?
-      (ABSTRACT_FROM  => 'lib/Plack/App/DBIC.pm',
+      (ABSTRACT => "Simle REST API implementation based on Plack",
        AUTHOR         => 'A. U. Thor <tjmc@localdomain>') : ()),
 );

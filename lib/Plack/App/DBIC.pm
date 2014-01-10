@@ -291,7 +291,7 @@ Plack::App::DBIC
 =head2 HEAD 
 
 
-=head2 OBJECT ATTRIBUTES
+=head1 OBJECT ATTRIBUTES
 
 =head3 serializers
 
