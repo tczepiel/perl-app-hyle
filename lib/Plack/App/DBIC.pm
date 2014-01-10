@@ -30,7 +30,7 @@ sub __jsonp_method {
     my $result_source_class  = $rs->result_source->result_class;
     my $jsonp_method_coderef = $object->can($jsonp_method_name);
 
-    if ( grep { $_ eq 'JSONP' } attributes::get($jsonp_method_coderef) ) { 
+    if ( grep { $_ eq 'JSONP' } attributes::get($jsonp_method_coderef) ) {
         # method has a 'JSONP' attribute.
         my @ret;
         eval {
@@ -243,6 +243,35 @@ Plack::App::DBIC
 
 =head1 SYNOPSIS
 
+    # cpanm Plack::App::DBIC
+
+    # restify  --dsn'dbi::SQLite::dbname=file.db' --username=... --password= ....
+
+    # curl http://localhost:8000/collection/id/7
+
+
+    # curl -X DELETE ...
+
+    # .... 
+    #
+    # more configuration 
+    
+    my $schema = DBIx::Class->connect(...);
+
+    my $app = Plack::App::DBIC->new(
+        schema => $schema,
+        ... other options ...
+    );
+
+    # make a custom mount with plack::builder ....
+
+    builder {
+        mount => "/somewhere" => $app;
+        mount => /somethingElse" => $other_app;
+    };
+
+    
+
 =head1 restify
 
 =head1 HTTP Methods
@@ -293,4 +322,43 @@ If true, the POST will either create or update an existing resource. It's false 
 =head2 Overriding HTTP method handlers
 
 subclass, global overrides, method implementation in resultsource class
+
+=head2 Support for JSONP
+
+this module is able to include information about potential methods of a result source, or any other subref implementing it.
+
+i.e.
+
+my $jsonp_method :JSONP = sub {
+    my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
+
+    $rs->search_where({
+        column => { -in => [ \@args ] },
+    });
+
+    # ....
+    my $response = $req->new_response(200);
+    $response->body( $self->serializer( ... ) );
+};
+
+GET http://localhost:3000/artist/id/7
+
+200 OK
+
+{ "a": 1, "b":2, "__jsonp_methods:["foo"] }
+
+var someFancyObject = { ...  };
+someFancyObject.foo = function( ) { ... };
+
+var ret = someFancyObject.foo({ meh => 1 },{ callback => function() { ... }} );
+
+POST http://localhost:8000/artist/id/7?jsonp=foo&jsonp_callback=gotData
+meh: 1
+
+...
+
+
+
+
+
 
