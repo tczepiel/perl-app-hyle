@@ -64,6 +64,14 @@ sub __jsonp_method {
 
 }
 
+sub __HEAD {
+    my $self = shift;
+    my $ret = $self->__GET(@_);
+
+    $response->body(undef) if $response->status == 404;
+    return $response;
+}
+
 sub __GET {
     my ($self,$req,$resultset,$rs,@args) = @_;
 
@@ -272,8 +280,6 @@ Plack::App::DBIC
 
     
 
-=head1 restify
-
 =head1 HTTP Methods
 
 =head2 GET
@@ -281,6 +287,8 @@ Plack::App::DBIC
 =head2 POST - update/create
 
 =head2 DELETE
+
+=head2 HEAD 
 
 
 =head2 OBJECT ATTRIBUTES
@@ -303,7 +311,7 @@ defaults to 'data/json', response content type and JSON::encode_json serializati
 
 allows overriding particular methods.
 
-if the class itself implements the GET/POST/DELETE etc., methods, those will be invoked first, then followed by the check for an appropriate method in the %overrides hash, if no method is found, the default __GET, __POST (etc) implementation will be used.
+if the class itself implements the __GET() __POST() __DELETE etc., methods, those will be invoked first, then followed by the check for an appropriate method in the %overrides hash, if no method is found, the default ( Plack::App::DBIC::__GET, etc.) implementation will be used.
 
 =head3 result_sources
 
@@ -317,11 +325,7 @@ Expose only the following result sources in the api.
 
 =head3 allow_post_updates
 
-If true, the POST will either create or update an existing resource. It's false by default, on conflict of an existing respource, a 409 HTTP response is returned.
-
-=head2 Overriding HTTP method handlers
-
-subclass, global overrides, method implementation in resultsource class
+If true, the POST will either create or update an existing resource. It's false by default, on conflict with an existing respource, a 409 HTTP response is returned.
 
 =head2 Support for JSONP
 
