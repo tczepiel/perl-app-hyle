@@ -45,7 +45,6 @@ sub __jsonp_method {
 
                return $req->new_response(500); # internal server error
         };
-
         
         my $resp = $req->new_response(204); # ok, no content
         if ( @ret ) {
@@ -66,10 +65,10 @@ sub __jsonp_method {
 
 sub __HEAD {
     my $self = shift;
-    my $ret = $self->__GET(@_);
+    my $res = $self->__GET(@_);
 
-    $response->body(undef) if $response->status == 404;
-    return $response;
+    $res->body(undef) if $res->status == 404;
+    return $res;
 }
 
 sub __GET {
