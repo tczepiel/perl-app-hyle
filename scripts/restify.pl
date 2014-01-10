@@ -12,7 +12,7 @@ use DBIx::Class::Schema::Loader;
 use Class::Load;
 use Getopt::Long;
 use Plack::Runner;
-use Plack::App::DBIC;
+use Hyle;
 
 my $dsn;
 GetOptions("dsn=s" => \$dsn)
@@ -48,7 +48,7 @@ for my $source ($schema->sources() ) {
     $source_class->set_primary_key($source_class->columns());
 }
 
-my $app    = Plack::App::DBIC->new( schema => $schema )->to_app;
+my $app    = Hyle->new( schema => $schema )->to_app;
 my $runner = Plack::Runner->new();
 $runner->parse_options(@ARGV);
 

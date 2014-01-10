@@ -3,8 +3,8 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 WriteMakefile(
-    NAME              => 'Plack::App::DBIC',
-    VERSION_FROM      => 'lib/Plack/App/DBIC.pm',
+    NAME              => 'Hyle',
+    VERSION_FROM      => 'lib/Hyle.pm',
     PREREQ_PM         => {
         Plack            => 0,
         parent           => 0,
@@ -15,6 +15,6 @@ WriteMakefile(
     },
     ($] >= 5.005 ?
       (ABSTRACT => "Simle REST API implementation based on Plack",
-       AUTHOR         => 'A. U. Thor <tjmc@localdomain>') : ()),
+       AUTHOR         => 'Tomasz Czepiel <tjmc@cpan.org>>') : ()),
     EXE_FILES => [ 'scripts/restify.pl' ],
 );

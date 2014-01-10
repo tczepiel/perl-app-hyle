@@ -1,6 +1,9 @@
 Changes
+lib/Hyle.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 README
-t/Plack-App-DBIC.t
-lib/Plack/App/DBIC.pm
+scripts/restify.pl
+t/Hyle.t
+t/MySchema.pm
+t/MySchema/Result/A.pm

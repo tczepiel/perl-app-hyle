@@ -1,4 +1,4 @@
-package Plack::App::DBIC;
+package Hyle;
 
 use strict;
 use warnings;
@@ -243,7 +243,7 @@ __END__
 
 =head1 NAME
 
-Plack::App::DBIC
+Hyle
 
 =head1 DESCRIPTION
 
@@ -251,7 +251,7 @@ Simple REST API interface to the database backend using Plack and DBIx::Class
 
 =head1 SYNOPSIS
 
-    # cpanm Plack::App::DBIC
+    # cpanm Hyle
 
     # restify.pl  --dsn'dbi::SQLite::dbname=file.db' --username=... --password= ....
 
@@ -266,7 +266,7 @@ Simple REST API interface to the database backend using Plack and DBIx::Class
     
     my $schema = DBIx::Class->connect(...);
 
-    my $app = Plack::App::DBIC->new(
+    my $app = Hyle->new(
         schema => $schema,
         ... other options ...
     );
@@ -311,7 +311,7 @@ defaults to 'data/json', response content type and JSON::encode_json serializati
 
 allows overriding particular methods.
 
-if the class itself implements the __GET() __POST() __DELETE etc., methods, those will be invoked first, then followed by the check for an appropriate method in the %overrides hash, if no method is found, the default ( Plack::App::DBIC::__GET, etc.) implementation will be used.
+if the class itself implements the __GET() __POST() __DELETE etc., methods, those will be invoked first, then followed by the check for an appropriate method in the %overrides hash, if no method is found, the default ( Hyle::__GET, etc.) implementation will be used.
 
 =head3 result_sources
 
