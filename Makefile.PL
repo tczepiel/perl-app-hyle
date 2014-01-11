@@ -19,7 +19,7 @@ WriteMakefile(
         'Getopt::Long'   => 0,
     },
     ($] >= 5.005 ?
-      (ABSTRACT => "Simle REST API implementation based on Plack",
+      (ABSTRACT => "Simple REST endpoint app for db backend build with Plack and DBIC",
        AUTHOR         => 'Tomasz Czepiel <tjmc@cpan.org>') : ()),
     EXE_FILES => [ 'scripts/hyle.pl' ],
 );
