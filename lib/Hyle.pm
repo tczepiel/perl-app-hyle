@@ -276,6 +276,8 @@ Hyle
 
 Simple REST API interface to the database backend using Plack and DBIx::Class
 
+WARNING: This is APLHA quality software.
+
 =head1 SYNOPSIS
 
     # cpanm Hyle
