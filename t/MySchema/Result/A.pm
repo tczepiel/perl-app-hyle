@@ -5,7 +5,18 @@ __PACKAGE__->table('A');
 __PACKAGE__->add_columns(qw/a/);
 __PACKAGE__->set_primary_key('a');
 
-use Attributes::Simple qw(CODE);
+my %attr;
+sub MODIFY_CODE_ATTRIBUTES {
+    my ($pkg,$subref,@attr) = @_;
+    $attr{$subref} =  \@attr;
+    return;
+}
+
+sub FETCH_CODE_ATTRIBUTES {
+    my ($pkg,$subref) = @_;
+    my $attributes =$attr{$subref} or return;
+    return wantarray ? @$attributes : $attributes;
+}
 
 sub foo :JSONP {
     my $self = shift;
