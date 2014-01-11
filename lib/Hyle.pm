@@ -30,7 +30,7 @@ sub __jsonp_method {
     my $result_source_class  = $rs->result_source->result_class;
     my $jsonp_method_coderef = $object->can($jsonp_method_name);
 
-    if ( grep { $_ eq 'JSONP' } attributes::get($jsonp_method_coderef) ) {
+    if ( __method_is_jsonp($jsonp_method_coderef) ) {
         # method has a 'JSONP' attribute.
         my @ret;
         eval {
@@ -63,6 +63,29 @@ sub __jsonp_method {
 
 }
 
+sub __method_is_jsonp { return grep { $_ eq 'JSONP' } attributes::get($_[0]) }
+
+
+my %jsonp_methods_cache;
+sub __get_jsonp_methods_info2response {
+    my ($result_source) = @_;
+
+    my $methods = $jsonp_methods_cache{$result_source} ||= do {
+        my $p = Package::Stash->new($result_source);
+
+        my @methods;
+        for my $method ( $p->list_all_symbols("CODE") ) {
+            my $coderef = $result_source->can($method);
+            next unless $coderef;
+            push @methods, $method if __method_is_jsonp($coderef);
+        }
+
+        \@methods;
+    };
+
+    return wantarray ? @$methods : $methods;
+}
+
 sub __HEAD {
     my $self = shift;
     my $res = $self->__GET(@_);
@@ -70,6 +93,7 @@ sub __HEAD {
     $res->body(undef) if $res->status == 404;
     return $res;
 }
+
 sub __GET {
     my ($self,$req,$resultset,$rs,@args) = @_;
 
@@ -86,6 +110,9 @@ sub __GET {
     my $response = Plack::Response->new();
     if ( @ret ) {
         $response->status(200);
+        if ( my @jsonp_method_definitions = __get_jsonp_methods_info2response($rs->result_source->result_class)) {
+            $_->{__jsonp_methods} = \@jsonp_method_definitions for @ret;
+        }
 
         my ($content_type, $data) = $self->serializer($req)->(\@ret);
 
