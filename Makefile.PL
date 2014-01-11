@@ -12,6 +12,11 @@ WriteMakefile(
         'DBIx::Class'    => 0,
         'Package::Stash' => 0,
         'HTTP::Message'  => 0,
+        'File::Temp'     => 0,
+        DBI              => 0,
+        'DBIx::Class::Schema::Loader' => 0,
+        'Class::Load'    => 0,
+        'Getopt::Long'   => 0,
     },
     ($] >= 5.005 ?
       (ABSTRACT => "Simle REST API implementation based on Plack",

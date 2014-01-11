@@ -3,8 +3,6 @@
 use strict;
 use warnings;
 
-use Carp::Always;
-use Data::Dumper;
 use File::Temp qw(tempdir);
 use DBI;
 use DBIx::Class;
