@@ -15,6 +15,6 @@ WriteMakefile(
     },
     ($] >= 5.005 ?
       (ABSTRACT => "Simle REST API implementation based on Plack",
-       AUTHOR         => 'Tomasz Czepiel <tjmc@cpan.org>>') : ()),
-    EXE_FILES => [ 'scripts/restify.pl' ],
+       eUTHOR         => 'Tomasz Czepiel <tjmc@cpan.org>>') : ()),
+    EXE_FILES => [ 'scripts/hyle.pl' ],
 );

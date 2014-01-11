@@ -253,7 +253,7 @@ Simple REST API interface to the database backend using Plack and DBIx::Class
 
     # cpanm Hyle
 
-    # restify.pl  --dsn'dbi::SQLite::dbname=file.db' --username=... --password= ....
+    # hyle.pl  --dsn'dbi::SQLite::dbname=file.db' --username=... --password= ....
 
     # curl http://localhost:8000/collection/id/7
 
