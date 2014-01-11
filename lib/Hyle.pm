@@ -384,7 +384,8 @@ someFancyObject.foo = function( ) { ... };
 var ret = someFancyObject.foo({ meh => 1 },{ callback => function() { ... }} );
 
 POST http://localhost:8000/artist/id/7?jsonp=foo&jsonp_callback=gotData
-meh: 1
+
+foo: 1
 
 
 =head1 COPYRIGHT AND LICENCE
