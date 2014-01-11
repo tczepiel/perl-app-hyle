@@ -12,15 +12,20 @@ use Getopt::Long;
 use Plack::Runner;
 use Hyle;
 
-my $dsn;
-GetOptions("dsn=s" => \$dsn)
+my ($dsn,$username,$password);
+GetOptions("dsn=s" => \$dsn, "user=s" => \$username, "pass=s" => \$password)
     or die "can't get the options";
+
+my ($prog) = $password ? ($0 =~ s/$password/xxxxxxxx/g) : undef;
+
+$password ||= '';
+$username ||= '';
 
 my $tempdir = tempdir();
 DBIx::Class::Schema::Loader::make_schema_at(
     'Schema',
     { dump_directory => $tempdir },
-    [ $dsn,  "", "", {} ],
+    [ $dsn,  $username,$password, {} ],
 );
 
 
@@ -36,7 +41,7 @@ eval {
 };
 
 # get the scema
-my $schema = Schema->connect($dsn, "", "");
+my $schema = Schema->connect($dsn, $username, $password);
 
 for my $source ($schema->sources() ) {
     # hack, add something as a primary column if no primary column(s) are defined
@@ -53,3 +58,20 @@ $runner->parse_options(@ARGV);
 $runner->run($app);
 
 unlink $tempdir if -e $tempdir;
+
+__END__
+
+head1 NAME 
+
+hyle.pl
+
+=head1 DESCRIPTION
+
+Simple REST API database backend implemented with Plack and DBIx::Class.
+
+For more details, see L<Hyle>.
+
+=head1 SYNOPSIS
+
+
+    # hyle.pl --dsn "dbi:SQLite:dbname=/home/user/some_database.sqlite3"
