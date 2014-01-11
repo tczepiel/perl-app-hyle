@@ -1,7 +1,6 @@
 use strict;
 use warnings;
 
-use Carp::Always;
 use Test::More qw(no_plan);
 use Test::Exception;
 use lib 't';
