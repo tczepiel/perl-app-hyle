@@ -358,36 +358,31 @@ If true, the POST will either create or update an existing resource. It's false 
 
 =head2 Support for JSONP
 
-this module is able to include information about potential methods of a result source, or any other subref implementing it.
+    my $jsonp_method :JSONP = sub {
+        my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
 
-i.e.
+        $rs->search_where({
+            column => { -in => [ \@args ] },
+        });
 
-my $jsonp_method :JSONP = sub {
-    my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
+        # ....
+        my $response = $req->new_response(200);
+        $response->body( $self->serializer( ... ) );
+    };
 
-    $rs->search_where({
-        column => { -in => [ \@args ] },
-    });
+    GET http://localhost:3000/artist/id/7
 
-    # ....
-    my $response = $req->new_response(200);
-    $response->body( $self->serializer( ... ) );
-};
+    { "a": 1, "b":2, "__jsonp_methods:["foo"] }
 
-GET http://localhost:3000/artist/id/7
+    var someFancyObject = { ...  };
 
-200 OK
+    someFancyObject.foo = function( ) { ... };
 
-{ "a": 1, "b":2, "__jsonp_methods:["foo"] }
+    var ret = someFancyObject.foo({ meh => 1 },{ callback => function() { ... }} );
 
-var someFancyObject = { ...  };
-someFancyObject.foo = function( ) { ... };
+    POST http://localhost:8000/artist/id/7?jsonp=foo&jsonp_callback=gotData
 
-var ret = someFancyObject.foo({ meh => 1 },{ callback => function() { ... }} );
-
-POST http://localhost:8000/artist/id/7?jsonp=foo&jsonp_callback=gotData
-
-foo: 1
+    ...
 
 
 =head1 COPYRIGHT AND LICENCE
