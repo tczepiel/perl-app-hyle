@@ -1,4 +1,5 @@
-Revision history for Perl extension Plack::App::DBIC.
+Revision history for Perl extension Hyle.
 
-0.01  Mon Dec 23 15:17:23 2013
+0.01 Sat Jan 11 2013
+    - initial release.
 
