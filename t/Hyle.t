@@ -47,6 +47,17 @@ lives_ok(sub {
 
 }, "get works");
 
+lives_ok(sub {
+    my $req = HTTP::Request::Common::HEAD 'A/1';
+    my $res = $test->request($req);
+
+    ok($res->is_success, "response is succesful");
+    cmp_ok($res->code, '==', 200, "response code 200 OK");
+    
+    ok(!$res->decoded_content, "no content returned");
+
+}," HEAD works");
+
 # POST ( update )
 lives_ok(sub {
     my $req = HTTP::Request::Common::POST 'A/1', [ a => 2 ];
