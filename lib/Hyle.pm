@@ -90,7 +90,7 @@ sub __HEAD {
     my $self = shift;
     my $res = $self->__GET(@_);
 
-    $res->body(undef) if $res->status == 404;
+    $res->body(undef) if $res->status == 200;
     return $res;
 }
 
