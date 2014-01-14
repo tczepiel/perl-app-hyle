@@ -22,7 +22,7 @@ local $0 = $prog;
 $password ||= '';
 $username ||= '';
 
-my $tempdir = tempdir();
+my $tempdir = tempdir(CLEANUP => 1);
 DBIx::Class::Schema::Loader::make_schema_at(
     'Schema',
     { dump_directory => $tempdir },
@@ -57,8 +57,6 @@ my $runner = Plack::Runner->new();
 $runner->parse_options(@ARGV);
 
 $runner->run($app);
-
-unlink $tempdir if -e $tempdir;
 
 __END__
 
