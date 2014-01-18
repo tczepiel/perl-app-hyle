@@ -17,7 +17,7 @@ GetOptions("dsn=s" => \$dsn, "user=s" => \$username, "pass=s" => \$password)
     or die "can't get the options";
 
 my ($prog) = $password ? ($0 =~ s/$password/xxxxxxxx/g) : undef;
-local $0 = $prog;
+$0 = $prog;
 
 $password ||= '';
 $username ||= '';
