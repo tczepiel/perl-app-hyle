@@ -48,7 +48,10 @@ for my $source ($schema->sources() ) {
     # hack, add something as a primary column if no primary column(s) are defined
     my $source_class = $schema->source($source);
     next if $source_class->primary_columns();
- 
+
+    print STDERR <<"EOF";
+    WARNING: Table $source has no primary key defined, defaulting to using all columns.
+EOF
     $source_class->set_primary_key($source_class->columns());
 }
 
@@ -72,5 +75,21 @@ For more details, see L<Hyle>.
 
 =head1 SYNOPSIS
 
-
     # hyle.pl --dsn "dbi:SQLite:dbname=/home/user/some_database.sqlite3"
+    # HTTP::Server::PSGI: Accepting connections at http://0:5000/
+    # ...
+
+=head1 OPTIONS
+
+=head2 dsn
+
+=head2 user
+
+=head2 pass
+
+This script uses Plack::Runner internally and therefore also accepts all parameters that plackup accepts.
+
+
+
+
+

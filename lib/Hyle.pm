@@ -43,7 +43,7 @@ sub __jsonp_method {
                $err,
                join ",", map { "$_=>$params{$_}" } keys %params;
 
-               return $req->new_response(500); # internal server error
+            return $req->new_response(500); # internal server error
         };
         
         my $resp = $req->new_response(204); # ok, no content
@@ -172,6 +172,18 @@ sub __DELETE {
     return $req->new_response(200);
 }
 
+sub __PUT {
+    my ( $self, $req, $resultset, $rs, @args ) = @_;
+
+    my $body_params = $req->body_parameters;
+    my $params      = ref($body_params) && $body_params->isa("Hash::MultiValue") 
+                      ? $body_params->as_hashref 
+                      : $body_params;
+
+    my $obj = $rs->create($params);
+    return $req->new_response(200);
+}
+
 our $rest2subref;
 sub _rest2subref {
     my ($self,$req,$resultset) = @_;
@@ -282,17 +294,19 @@ WARNING: This is APLHA quality software.
 
     # cpanm Hyle
 
-    # hyle.pl  --dsn'dbi::SQLite::dbname=file.db' --username=... --password= ....
+    # echo "CREATE TABLE cds (id int not null, title varchar);" | sqlite3 /tmp/foo.db
 
-    # curl http://localhost:8000/collection/id/7
+    # hyle.pl  --dsn'dbi::SQLite::dbname=/tmp/foo.db'
+    # HTTP::Server::PSGI: Accepting connections at http://0:5000/
+    # ...
 
+    # curl -X PUT --data'id:1&=title=sdfsf' http://localhost:5000/cds/
 
-    # curl -X DELETE ...
+    # curl http://localhost:5000/cds/id/7
 
-    # .... 
-    #
+    # curl -X GET,DELETE,POST
+
     # more configuration 
-    
     my $schema = DBIx::Class->connect(...);
 
     my $app = Hyle->new(
@@ -307,20 +321,22 @@ WARNING: This is APLHA quality software.
         mount => /somethingElse" => $other_app;
     };
 
-    
 
-=head1 HTTP Methods
+=head1 Default REST methods implementations for
 
 =head2 GET
 
-=head2 POST - update/create
+=head2 POST 
+
+=head2 PUT
 
 =head2 DELETE
 
 =head2 HEAD 
 
-
 =head1 OBJECT ATTRIBUTES
+
+The Hyle object can be provided a number of attributes, they're all in the format of : hashkey => HASHREF. All of those parameters are optional.
 
 =head3 serializers
 
@@ -329,7 +345,7 @@ WARNING: This is APLHA quality software.
         ...,
     );
 
-defaults to 'data/json', response content type and JSON::encode_json serialization function.
+defaults to 'data/json', response content type and JSON::encode_json serialization function if no serializers are provided.
 
 =head3 override
 
@@ -338,9 +354,13 @@ defaults to 'data/json', response content type and JSON::encode_json serializati
         ...,
     );
 
-allows overriding particular methods.
+allows overriding of default actions per resultset.
 
-if the class itself implements the __GET() __POST() __DELETE etc., methods, those will be invoked first, then followed by the check for an appropriate method in the %overrides hash, if no method is found, the default ( Hyle::__GET, etc.) implementation will be used.
+You can also subclass the Hyle class or provide default REST methods overrides in particular ResultSource class.
+
+The app is going to try the following things when looking for an appropriate REST method implementation to dispatch to or a given resultset/ database table.
+
+if the ResultSource class itself implements the __GET() __POST() __DELETE etc., methods, those will be invoked first, then followed by the check for an appropriate method in the %overrides hash, if no method is found, the default ( Hyle::__GET, etc.) implementation will be used.
 
 =head3 result_sources
 
@@ -352,13 +372,11 @@ if the class itself implements the __GET() __POST() __DELETE etc., methods, thos
 
 Expose only the following result sources in the api.
 
-=head3 allow_post_updates
-
-If true, the POST will either create or update an existing resource. It's false by default, on conflict with an existing respource, a 409 HTTP response is returned.
-
 =head2 Support for JSONP
 
-    my $jsonp_method :JSONP = sub {
+It's possible to add code that will be handled as jsonp call, i.e.:
+
+    my $jsonp_method = sub {
         my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
 
         $rs->search_where({
@@ -369,6 +387,22 @@ If true, the POST will either create or update an existing resource. It's false 
         my $response = $req->new_response(200);
         $response->body( $self->serializer( ... ) );
     };
+
+    my $app = Hyle->new(
+        schema   => $schema,
+        override => {
+            cds => { jsonp_method_name => $jsonp_method },
+        },
+    );
+
+The method can also be declared inside of the particulat DBIC ResultSource class. In that case however, the application will only accept methods that have subroutine attribute of 'JSONP", i.e.:
+
+   sub DoSomethhingElse :JSONP {
+        my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
+        ...;
+   }
+
+The application can also advertise jsonp method alongside the data returned by GET requsts.
 
     GET http://localhost:3000/artist/id/7
 
@@ -382,7 +416,6 @@ If true, the POST will either create or update an existing resource. It's false 
 
     POST http://localhost:8000/artist/id/7?jsonp=foo&jsonp_callback=gotData
 
-    ...
 
 
 =head1 COPYRIGHT AND LICENCE
