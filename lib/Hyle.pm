@@ -314,7 +314,7 @@ WARNING: This is APLHA quality software.
         ... other options ...
     );
 
-    # make a custom mount with plack::builder ....
+    # make a custom mount with Plack::Builder
 
     builder {
         mount => "/somewhere" => $app;
