@@ -17,6 +17,7 @@ WriteMakefile(
         'DBIx::Class::Schema::Loader' => 0,
         'Class::Load'    => 0,
         'Getopt::Long'   => 0,
+        'Hash::MultiValue' => 0,
     },
     ($] >= 5.005 ?
       (ABSTRACT => "Simple REST endpoint app for db backend build with Plack and DBIC",
