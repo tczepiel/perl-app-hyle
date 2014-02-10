@@ -14,15 +14,32 @@ use JSON;
 my $dbfile =':memory:';
 my $schema = MySchema->connect("dbi:SQLite:dbname=$dbfile","","");
 
-my $app  = Hyle->new(schema => $schema)->to_app;
+my $hyle = Hyle->new(
+    schema => $schema,
+
+    # expose only the specific result sources
+    result_sources => {
+        A => 1,
+        # when accessing table B, we're expecting to fail and get back a 404
+    },
+
+    # provide custom jsonp method
+    override => {
+        A => {
+            hello => sub { "Hello!" },
+        },
+    },
+);
 
 {
     my $dbh = $schema->storage->dbh;
     $dbh->do("CREATE TABLE A (a int not null)");
+    $dbh->do("CREATE TABLE B (a int not null)");
     $dbh->do("INSERT INTO A VALUES (1)");
+    $dbh->do("INSERT INTO B VALUES (1)");
 }
 
-my $test = Plack::Test->create($app);
+my $test = Plack::Test->create($hyle->to_app);
 
 # GET
 lives_ok(sub {
@@ -50,6 +67,8 @@ lives_ok(sub {
    ok(@$ret == 1, "only one result returned");
 
    ok($ret->[0]{a} == 1, "returned content matches input");
+
+   cmp_ok(scalar @{$ret->[0]{__jsonp_methods}}, '==', 2, "number of JSONP methods returned ok");
 
 }, "get works");
 
@@ -148,6 +167,14 @@ lives_ok(sub {
     },"decoded response ok");
 
 }, "POST(create) works");
+
+# Restricted source
+lives_ok(sub {
+    my $response = $test->request( +HTTP::Request->new(GET => 'B/1') );
+
+    cmp_ok($response->code, '==', 404, "no resource found for table B");
+
+}, "result source restriction works");
 
 
 # JSONP - not found

@@ -13,7 +13,7 @@ use HTTP::Request;
 
 # add skip all unless YAML module installed
 
-unless (eval "use YAML ();1") {
+unless (eval "use YAML (); 1") {
     plan skip_all => "need YAML module installed to test another serializer";
     done_testing();
     exit;
@@ -32,29 +32,16 @@ my $hyle = Hyle->new(
         },
     },
 
-    # expose only the specific result sources
-    result_sources => {
-        A => 1,
-        # when accessing table B, we're expecting to fail and get back a 404
-    },
-
-    # provide custom jsonp method
-    override => {
-        A => {
-            hello => sub { "Hello!" },
-        },
-    },
 );
 
 {
     my $dbh = $schema->storage->dbh;
     $dbh->do("CREATE TABLE A (a int not null)");
-    $dbh->do("CREATE TABLE B (a int not null)");
     $dbh->do("INSERT INTO A VALUES (1)");
-    $dbh->do("INSERT INTO B VALUES (1)");
 }
 
 my $test = Plack::Test->create($hyle->to_app);
+
 
 # YAML Response
 lives_ok(sub {
@@ -80,17 +67,7 @@ lives_ok(sub {
 
    ok($ret->[0]{a} == 1, "returned content matches input");
 
-   cmp_ok(scalar @{$ret->[0]{__jsonp_methods}}, '==', 2, "number of JSONP methods returned ok");
-
 }, "can decode YAML response");
-
-# Restricted source
-lives_ok(sub {
-    my $response = $test->request( +HTTP::Request->new(GET => 'B/1') );
-
-    cmp_ok($response->code, '==', 404, "no resource found for table B");
-
-}, "result source restriction works");
 
 
 done_testing();
