@@ -13,7 +13,7 @@ use Carp qw(croak carp);
 use attributes qw();
 use URI::Escape;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 sub __jsonp_method {
     my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
