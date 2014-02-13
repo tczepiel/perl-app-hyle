@@ -24,4 +24,5 @@ WriteMakefile(
       (ABSTRACT => "Simple REST endpoint app for db backend build with Plack and DBIC",
        AUTHOR         => 'Tomasz Czepiel <tjmc@cpan.org>') : ()),
     EXE_FILES => [ 'scripts/hyle.pl' ],
+    LICENSE => "perl",
 );
