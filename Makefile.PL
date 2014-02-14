@@ -25,4 +25,9 @@ WriteMakefile(
        AUTHOR         => 'Tomasz Czepiel <tjmc@cpan.org>') : ()),
     EXE_FILES => [ 'scripts/hyle.pl' ],
     LICENSE => "perl",
+    META_MERGE => {
+        resources => {
+            repository => 'git://github.com/tczepiel/perl-app-hyle.git',
+        },
+    },
 );
