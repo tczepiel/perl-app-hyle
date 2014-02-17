@@ -2,6 +2,13 @@ use strict;
 use warnings;
 
 use ExtUtils::MakeMaker;
+
+my %required_for_test = (
+    'Plack::Test'     => 0,
+    'Test::More'      => 0,
+    'Test::Exception' => 0,
+);
+
 WriteMakefile(
     NAME              => 'Hyle',
     VERSION_FROM      => 'lib/Hyle.pm',
@@ -19,7 +26,9 @@ WriteMakefile(
         'Getopt::Long'   => 0,
         'Hash::MultiValue' => 0,
         'URI::Escape'    => 0,
+        ($ExtUtils::MakeMaker::VERSION < 6.64 ? (%required_for_test) : ()),
     },
+    ($ExtUtils::MakeMaker::VERSION >= 6.64 ? (TEST_REQUIRES => \%required_for_test) : () ),
     ($] >= 5.005 ?
       (ABSTRACT => "Simple REST endpoint app for db backend build with Plack and DBIC",
        AUTHOR         => 'Tomasz Czepiel <tjmc@cpan.org>') : ()),
