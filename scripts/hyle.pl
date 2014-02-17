@@ -16,8 +16,17 @@ my ($dsn,$username,$password);
 GetOptions("dsn=s" => \$dsn, "user=s" => \$username, "pass=s" => \$password)
     or die "can't get the options";
 
+
+unless ($dsn) {
+    print STDERR <<"EOF";
+    Usage: hyle.pl --dsn "dbi:SQLite:dbname=dbfile"
+EOF
+
+    exit 1;
+}
+
 my ($prog) = $password ? ($0 =~ s/$password/xxxxxxxx/g) : undef;
-$0 = $prog;
+$0 = $prog if $prog;
 
 $password ||= '';
 $username ||= '';
