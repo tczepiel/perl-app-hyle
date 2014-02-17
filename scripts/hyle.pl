@@ -26,8 +26,7 @@ EOF
         exit 1;
     }
 
-    my ($prog) = $password ? ($0 =~ s/$password/xxxxxxxx/g) : undef;
-    $0 = $prog if $prog;
+    $0 = "hyle.pl --dsn $dsn" if $password;
 
     $password ||= '';
     $username ||= '';
