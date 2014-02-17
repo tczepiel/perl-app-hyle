@@ -6,6 +6,7 @@ README
 scripts/hyle.pl
 t/Hyle-yaml-serializer.t
 t/Hyle.t
+t/hyle_pl.t
 t/MySchema.pm
 t/MySchema/Result/A.pm
 t/MySchema/Result/B.pm
