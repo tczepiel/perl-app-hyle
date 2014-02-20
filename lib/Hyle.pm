@@ -13,7 +13,7 @@ use Carp qw(croak carp);
 use attributes qw();
 use URI::Escape;
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 sub __jsonp_method {
     my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
@@ -170,9 +170,14 @@ sub __DELETE {
     my ($self,$req,$resultset,$rs,@args) = @_;
 
     my ($primary) = $rs->result_source->primary_columns();
-    $rs->search({
+
+    my $res = $rs->search({
         $primary => { -in => \@args },
-    })->delete();
+    });
+
+    return $req->new_response(404) unless $res->count() > 0;
+
+    $res->delete();
 
     return $req->new_response(200);
 }

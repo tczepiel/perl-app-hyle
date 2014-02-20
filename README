@@ -1,4 +1,4 @@
-Hyle version 0.03
+Hyle version 0.04
 ===========================
 
 Simple REST API interface to the database backend using Plack and DBIx::Class

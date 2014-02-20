@@ -136,14 +136,24 @@ lives_ok(sub {
 
 }, "put works");
 
+# DELETE ( not found )
+lives_ok(sub {
+    my $req = HTTP::Request->new( DELETE => "A/1");
+
+    my $res = $test->request($req);
+
+    ok($res->code == 404, "ok, resource not found");
+
+}, "delete returns 404 when no data is found");
+
 # DELETE
 lives_ok(sub {
-    my $req = HTTP::Request->new(DELETE=> 'A/1');
+    my $req = HTTP::Request->new(DELETE=> 'A/7');
     my $res = $test->request($req);
-    
+ 
     ok($res->code == 200, "response code 200 OK");
 
-    $req = HTTP::Request->new(GET => 'A/1');
+    $req = HTTP::Request->new(GET => 'A/7');
     $res = $test->request($req);
 
     ok($res->code == 404, "resource deleted succesfully");
