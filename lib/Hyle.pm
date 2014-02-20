@@ -408,7 +408,7 @@ It's possible to add code that will be handled as jsonp call, i.e.:
     my $jsonp_method = sub {
         my ($self,$req,$resultset,$rs,$jsonp_method_name,@args) = @_;
 
-        $rs->search_where({
+        $rs->search({
             column => { -in => [ \@args ] },
         });
 
